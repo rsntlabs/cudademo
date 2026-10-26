@@ -120,12 +120,12 @@ try {
   const pixels = await evaluate(`(async()=>{document.getElementById('reset').click();const canvas=document.getElementById('particles');const bitmap=await createImageBitmap(canvas);const probe=document.createElement('canvas');probe.width=canvas.width;probe.height=canvas.height;const ctx=probe.getContext('2d');ctx.drawImage(bitmap,0,0);const p=ctx.getImageData(0,0,probe.width,probe.height).data;let lit=0;for(let i=0;i<p.length;i+=4)if(p[i]>40 || p[i+1]>40 || p[i+2]>40)lit++;bitmap.close();return lit})()`);
   assert.ok(pixels > 2000, `Expected thousands of visible particle pixels, found ${pixels}`);
   console.log(`PASS: particle image has ${pixels} lit pixels`);
-  await setSource(original.replace('points[i].x = x * 0.86f;', 'points[i].x = 0.0f;'));
+  await setSource(original.replace(/points\[i\]\.x\s*=.*;/, 'points[i].x = 0.0f;'));
   await wait(`document.getElementById('status-bar').dataset.state === 'success' && !document.getElementById('compile').disabled`);
   const editedWgsl = await evaluate(`document.getElementById('wgsl').value`);
   assert.notEqual(editedWgsl, originalWgsl);
   const bounds = await evaluate(`(async()=>{const c=document.getElementById('particles');const b=await createImageBitmap(c);const p=document.createElement('canvas');p.width=c.width;p.height=c.height;const x=p.getContext('2d');x.drawImage(b,0,0);const d=x.getImageData(0,0,p.width,p.height).data;let lit=0;for(let i=0;i<d.length;i+=4)if(d[i]>40 || d[i+1]>40 || d[i+2]>40)lit++;b.close();return lit})()`);
-  assert.ok(bounds < pixels * 0.5, 'Changing CUDA must visibly collapse the galaxy into a line');
+  assert.ok(bounds < pixels * 0.5, 'Changing CUDA must visibly collapse the particle field into a line');
   console.log('PASS: editing CUDA changes generated WGSL and the rendered particle positions');
   await setSource('__global__ void broken( {');
   await wait(`document.getElementById('status-bar').dataset.state === 'error'`);

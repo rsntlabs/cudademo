@@ -182,7 +182,7 @@ const gpu = ParticleRenderer.create($('particles'), message => { showStageError(
   .then(value => { renderer = value; renderer.setCount(Number($('count').value)); })
   .catch(error => showStageError(error.message));
 const compiler = startCompiler().catch(error => { status(error.message, 'error'); showStageError(error.message); });
-await Promise.all([gpu, compiler, loadPreset('galaxy')]);
+await Promise.all([gpu, compiler, loadPreset($('preset').value)]);
 initializing = false;
 $('compile').disabled = false;
 if (compilerReady) await compile();
