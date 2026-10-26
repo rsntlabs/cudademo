@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 const artifacts = resolve('.test-artifacts');
 await mkdir(artifacts, { recursive: true });
 const profile = await mkdtemp(join(tmpdir(), 'cuda-webgpu-test-'));
-const prefix = '/cudademo.rsntlabs.com/';
+const prefix = '/cudademo/';
 const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.wasm': 'application/wasm', '.cu': 'text/plain' };
 const server = createServer(async (req, res) => {
   try {

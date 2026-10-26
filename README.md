@@ -1,4 +1,4 @@
-# CUDA → WebGPU
+# cudademo · CUDA → WebGPU
 
 A static shader playground for rsnt labs. Edit a CUDA kernel, translate it to WGSL
 inside a Web Worker using Naga compiled to WebAssembly, then run that exact WGSL
@@ -69,7 +69,7 @@ With Node 24+ and Chromium installed:
 ```sh
 node scripts/test-browser.mjs
 # Check the published site using the same tests:
-node scripts/test-browser.mjs https://rsntlabs.github.io/cudademo.rsntlabs.com/
+node scripts/test-browser.mjs https://rsntlabs.github.io/cudademo/
 ```
 
 Set `CHROMIUM` to another Chromium executable when needed (Chrome for Testing
@@ -92,6 +92,6 @@ deployment**, select **GitHub Actions**. GitHub requires an eligible plan to
 publish Pages from a private repository. The workflow does not change repository
 visibility. After setup, rerun the workflow or push to `main`.
 
-Default URL: `https://rsntlabs.github.io/cudademo.rsntlabs.com/`.
+Default URL: `https://rsntlabs.github.io/cudademo/`.
 All asset URLs are relative and also work at a custom domain's root if a custom
 domain is configured in GitHub Pages.
