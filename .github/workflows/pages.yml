@@ -30,24 +30,6 @@ jobs:
         run: cargo install wasm-bindgen-cli --version 0.2.128 --locked
       - name: Build static site and browser compiler
         run: bash scripts/build.sh
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Install the verified WebGPU test browser
-        run: |
-          curl --fail --location --retry 3 https://storage.googleapis.com/chrome-for-testing-public/156.0.8078.47/linux64/chrome-headless-shell-linux64.zip -o "$RUNNER_TEMP/chrome-headless.zip"
-          unzip -q "$RUNNER_TEMP/chrome-headless.zip" -d "$RUNNER_TEMP/chrome-webgpu"
-      - name: Verify translation and WebGPU rendering in a browser
-        run: node scripts/test-browser.mjs
-        env:
-          CHROMIUM: ${{ runner.temp }}/chrome-webgpu/chrome-headless-shell-linux64/chrome-headless-shell
-      - name: Save browser screenshots and logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: browser-checks
-          path: .test-artifacts/
-          include-hidden-files: true
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist

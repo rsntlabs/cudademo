@@ -25,7 +25,7 @@ const server = createServer(async (req, res) => {
 });
 if (!process.argv[2]) await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const base = process.argv[2] || `http://127.0.0.1:${server.address().port}${prefix}`;
-const graphicsFlags = process.env.CHROMIUM_FLAGS?.split(/\s+/).filter(Boolean) || ['--enable-features=Vulkan', '--use-angle=vulkan', '--use-vulkan=swiftshader', '--disable-vulkan-surface', '--enable-unsafe-webgpu'];
+const graphicsFlags = process.env.CHROMIUM_FLAGS?.split(/\s+/).filter(Boolean) || ['--enable-features=Vulkan', '--use-angle=vulkan', '--use-vulkan=swiftshader', '--use-webgpu-adapter=swiftshader', '--disable-vulkan-surface', '--enable-unsafe-webgpu'];
 const browser = spawn(process.env.CHROMIUM || 'chromium', ['--headless', '--no-sandbox', '--disable-dev-shm-usage', ...graphicsFlags, '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
 let browserLog = '';
 browser.stderr.on('data', chunk => { browserLog += chunk; });
@@ -85,6 +85,7 @@ try {
       const getAdapter=navigator.gpu.requestAdapter.bind(navigator.gpu);
       navigator.gpu.requestAdapter=async(...args)=>{
         const adapter=await getAdapter(...args); if(!adapter)return adapter;
+        globalThis.testAdapterInfo={vendor:adapter.info.vendor,architecture:adapter.info.architecture,device:adapter.info.device,description:adapter.info.description};
         const getDevice=adapter.requestDevice.bind(adapter);
         adapter.requestDevice=async(...args)=>{
           const device=await getDevice(...args);globalThis.testDevice=device;
@@ -101,6 +102,7 @@ try {
   await tab('Page.bringToFront');
   await wait(`document.getElementById('status-bar')?.dataset.state === 'success' && document.getElementById('preview-state').textContent === 'LIVE PREVIEW'`);
   console.log('PASS: WASM translated CUDA and the WebGPU pipeline is running');
+  console.log('WebGPU adapter:', await evaluate('testAdapterInfo'));
   const pointSample = await evaluate(`(async()=>{const d=testDevice;const b=d.createBuffer({size:256,usage:GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ});const e=d.createCommandEncoder();e.copyBufferToBuffer(testPoints,0,b,0,256);d.queue.submit([e.finish()]);await b.mapAsync(GPUMapMode.READ);const values=Array.from(new Float32Array(b.getMappedRange()));b.unmap();b.destroy();return values})()`);
   assert.ok(pointSample.every(Number.isFinite) && pointSample.some(v=>v!==0), 'Compute output must contain finite particle data');
   console.log('PASS: actual GPU compute buffer contains valid particle positions');

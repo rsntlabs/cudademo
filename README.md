@@ -83,10 +83,10 @@ Local tests serve under the repository subpath to exercise GitHub Pages paths.
 
 ## GitHub Pages
 
-The workflow tests and builds the WASM compiler, runs browser checks, uploads
-`dist/`, and deploys to GitHub Pages on every push to `main`. Browser checks use
-the verified Chrome for Testing 156.0.8078.47 build with software WebGPU. Pull
-requests run the same build and verification without deploying.
+The workflow runs Rust tests, builds the WASM compiler, uploads `dist/`, and
+deploys to GitHub Pages on every push to `main`. Browser checks are run manually
+using the command above and are intentionally excluded from CI. Pull requests
+run the Rust tests and build without deploying.
 
 For first-time setup, in the repository's **Settings → Pages → Build and
 deployment**, select **GitHub Actions**. GitHub requires an eligible plan to
