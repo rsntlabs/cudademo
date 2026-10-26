@@ -1,0 +1,62 @@
+name: Build and publish GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Test the CUDA frontend and all particle kernels
+        run: cargo test --locked
+      - name: Install matching WASM bindings tool
+        run: cargo install wasm-bindgen-cli --version 0.2.128 --locked
+      - name: Build static site and browser compiler
+        run: bash scripts/build.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify translation and WebGPU rendering in a browser
+        run: node scripts/test-browser.mjs
+        env:
+          CHROMIUM: google-chrome
+      - name: Save browser screenshots and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-checks
+          path: .test-artifacts/
+          include-hidden-files: true
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - uses: actions/deploy-pages@v4
+        id: deployment
