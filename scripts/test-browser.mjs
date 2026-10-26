@@ -104,6 +104,7 @@ try {
   const pointSample = await evaluate(`(async()=>{const d=testDevice;const b=d.createBuffer({size:256,usage:GPUBufferUsage.COPY_DST|GPUBufferUsage.MAP_READ});const e=d.createCommandEncoder();e.copyBufferToBuffer(testPoints,0,b,0,256);d.queue.submit([e.finish()]);await b.mapAsync(GPUMapMode.READ);const values=Array.from(new Float32Array(b.getMappedRange()));b.unmap();b.destroy();return values})()`);
   assert.ok(pointSample.every(Number.isFinite) && pointSample.some(v=>v!==0), 'Compute output must contain finite particle data');
   console.log('PASS: actual GPU compute buffer contains valid particle positions');
+  await wait(`parseInt(document.getElementById('fps').textContent, 10) > 0`);
   assert.match(await evaluate(`document.getElementById('wgsl').value`), /@compute[\s\S]*@workgroup_size\(64/);
   assert.equal(await evaluate(`document.querySelectorAll('textarea').length`), 2);
   assert.match(await evaluate(`document.getElementById('revision-link').href`), /02f26c369996e6204d38069048be9051c2ea4e74/);

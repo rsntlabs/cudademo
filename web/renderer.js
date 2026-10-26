@@ -117,7 +117,7 @@ export class ParticleRenderer {
     if (document.visibilityState === 'visible') {
       if (!this.paused && this.pipeline) {
         if (this.lastFrame) this.time += Math.min((now - this.lastFrame) / 1000, 0.05);
-        if (this.draw()) this.frames++;
+        this.draw();
       }
       if (now - this.statsStart >= 1000) {
         this.onStats(this.paused ? 0 : Math.round(this.frames * 1000 / (now - this.statsStart)));
@@ -145,6 +145,7 @@ export class ParticleRenderer {
     const render = encoder.beginRenderPass({ colorAttachments: [{ view: this.context.getCurrentTexture().createView(), clearValue: { r: 0.024, g: 0.041, b: 0.043, a: 1 }, loadOp: 'clear', storeOp: 'store' }] });
     render.setPipeline(this.drawPipeline); render.setBindGroup(0, this.drawGroup); render.draw(6, this.count); render.end();
     device.queue.submit([encoder.finish()]);
+    this.frames++;
     this.framePending = device.queue.onSubmittedWorkDone().then(() => {
       this.framePending = null;
       if (this.needsDraw) this.draw();
